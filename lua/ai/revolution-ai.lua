@@ -1159,7 +1159,7 @@ local lunhui_skill = {}
 lunhui_skill.name = "lunhui"
 table.insert(sgs.ai_skills, lunhui_skill)
 lunhui_skill.getTurnUseCard = function(self,room,player,data)
-	if self.player:hasUsed("ViewAsSkill_lunhuiCard") or self.player:getPile("Fragments"):length()==0 then return end
+	if self.player:hasUsed("ViewAsSkill_lunhuiCard") or self.player:getPile("Fragments"):length()==0 or self.player:getKingdom()~="magic" then return end
 	local id
 	local idn
 	local ids = self.player:getPile("Fragments")

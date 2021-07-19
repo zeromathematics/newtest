@@ -1589,7 +1589,7 @@ sgs.ai_skill_use_func.NuequCard = function(card,use,self)
 		end
 	end]]
 
-	if not target then target = targets[1] end
+	--if not target then target = targets[1] end
 
 
 
