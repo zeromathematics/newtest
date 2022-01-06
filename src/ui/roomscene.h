@@ -173,6 +173,7 @@ public:
     GuhuoBox *current_guhuo_box;
 
     void updateGlobalCardBox(const ClientPlayer *player, int id = -1);
+    void redrawDashboardButtons();
 
 public slots:
     void addPlayer(ClientPlayer *player);

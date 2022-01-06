@@ -518,7 +518,12 @@ void ChooseGeneralBox::adjustItems()
                 }
             }
         }
-
+        if (Sanguosha->getGeneral(selected.first()->objectName())->getKingdom() == "careerist"){
+            can = true;
+        }
+        if (Sanguosha->getGeneral(selected.last()->objectName())->getKingdom() == "careerist"){
+            can = false;
+        }
         confirm->setEnabled(can);
     } else if (selected.length() == 1) {
         selected.first()->hideCompanion();
@@ -536,13 +541,13 @@ void ChooseGeneralBox::adjustItems()
             }
 
             if (BanPair::isBanned(seleted_general->objectName(), general->objectName())
-                || ( (kingdoms1.isEmpty()&&kingdoms2.isEmpty()&&seleted_general->getKingdom()!= general->getKingdom()) ||general->isLord())) {
+                || ( (kingdoms1.isEmpty()&&kingdoms2.isEmpty()&&seleted_general->getKingdom()!= general->getKingdom()) && seleted_general->getKingdom() != "careerist" ||general->isLord()|| general->getKingdom() == "careerist")) {
                 if (!card->isFrozen())
                     card->setFrozen(true);
                 card->hideCompanion();
 
 
-            }else if((!kingdoms1.isEmpty()&& kingdoms2.isEmpty()&&!kingdoms1.contains(general->getKingdom()))||(!kingdoms2.isEmpty()&& kingdoms1.isEmpty()&&!kingdoms2.contains(seleted_general->getKingdom()))){
+            }else if(seleted_general->getKingdom() != "careerist" && ((!kingdoms1.isEmpty()&& kingdoms2.isEmpty()&&!kingdoms1.contains(general->getKingdom()))||(!kingdoms2.isEmpty()&& kingdoms1.isEmpty()&&!kingdoms2.contains(seleted_general->getKingdom())))){
                 if (!card->isFrozen())
                     card->setFrozen(true);
                 card->hideCompanion();
@@ -610,26 +615,32 @@ void ChooseGeneralBox::_initializeItems()
                     has_lord = true;
             }
             if (general->getKingdom().split("|").contains(other->getKingdom())||other->getKingdom().split("|").contains(general->getKingdom())) {
-                double_kingdom_party = true;
+                if (other != general)
+                  double_kingdom_party = true;
             }
             foreach(auto s, general->getKingdom().split("|")){
                 foreach(auto t, other->getKingdom().split("|")){
-                    if (s == t){
+                    if (s == t && other != general){
                         double_kingdom_party = true;
                     }
                 }
             }
         }
         GeneralCardItem *item = items.at(index);
-        if ((party < 2 || (selected.isEmpty() && has_lord && party == 2)) && !double_kingdom_party) {
-            if (!item->isFrozen())
-                item->setFrozen(true);
-        } else if (item->isFrozen()) {
+        if (general->getKingdom() != "careerist"){
+            if ((party < 2 || (selected.isEmpty() && has_lord && party == 2)) && !double_kingdom_party) {
+                if (!item->isFrozen())
+                    item->setFrozen(true);
+            } else if (item->isFrozen()) {
+                item->setFrozen(false);
+            }
+
+            if (Self->isDead() && item->isFrozen())
+                item->setFrozen(false);
+        }
+        else{
             item->setFrozen(false);
         }
-
-        if (Self->isDead() && item->isFrozen())
-            item->setFrozen(false);
         ++index;
     }
 }

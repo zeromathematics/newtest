@@ -484,6 +484,7 @@ QString QSanRoomSkin::getPlayerAudioEffectPath(const QString &eventName, const Q
         }
 
         if (skill) fileNames = skill->getSources(general, skinId);
+        if (skill && fileNames.isEmpty()) fileNames = skill->getSources(general, 0);
         if (!fileNames.isEmpty()) {
             QStringList sources_copy;
             QRegExp rx(".+/" + eventName + "_" + general + "(\\d?).ogg");
@@ -1392,6 +1393,7 @@ bool QSanRoomSkin::_loadLayoutConfig(const QVariant &layout)
     tryParse(config["cancelButtonArea"], _m_dashboardLayout.m_cancelButtonArea);
     tryParse(config["discardButtonArea"], _m_dashboardLayout.m_discardButtonArea);
     tryParse(config["trustButtonArea"], _m_dashboardLayout.m_trustButtonArea);
+    tryParse(config["skinButtonArea"], _m_dashboardLayout.m_skinButtonArea);
     tryParse(config["equipBorderPos"], _m_dashboardLayout.m_equipBorderPos);
     tryParse(config["equipSelectedOffset"], _m_dashboardLayout.m_equipSelectedOffset);
     tryParse(config["disperseWidth"], _m_dashboardLayout.m_disperseWidth);

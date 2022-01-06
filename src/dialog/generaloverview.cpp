@@ -369,6 +369,7 @@ void GeneralOverview::fillGenerals(const QList<const General *> &generals, bool 
                 general->tryLoadingSkinTranslation(skinId);
             tempGeneralMap[general] = skinId;
 #ifdef Q_OS_IOS
+            ui->comboBox->addItem(general->getAnime() + " " + Sanguosha->translate(general->objectName()), QVariant::fromValue(general->objectName()));
             ui->comboBox->addItem(general->getTitle() + " " + Sanguosha->translate(general->objectName()), QVariant::fromValue(general->objectName()));
 #endif
         } else {

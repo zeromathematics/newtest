@@ -72,7 +72,7 @@ void GuhuoBox::popup()
     maxrow = 0;
     scale = 7;
     titles.clear();
-    QStringList names1, names2, names3, names4, names5, names6, names7, names8, names9;
+    QStringList names1, names2, names3, names4, names5, names6, names7, names8, names9, names10;
 
     QList<Card *> cards = Sanguosha->getCards();
     if (flags.contains("b")) {
@@ -200,6 +200,26 @@ void GuhuoBox::popup()
             newtitle->setParentItem(this);
             titles << newtitle;
             maxcardcount = qMax(maxcardcount, names9.length());
+            ++maxrow;
+        }
+    }
+
+    //xuexi
+    if (flags.contains("p")) {
+        foreach (const Card *card, cards){
+            if ( !ServerInfo.Extensions.contains("!" + card->getPackage())) {
+                if (Self->getMark(card->objectName()+"xuexi")==0 || names10.contains(card->objectName()) || !isButtonEnable(card->objectName()))
+                    continue;
+
+                names10 << card->objectName();
+
+            }
+        }
+        if (!names10.isEmpty()) {
+            Title *newtitle = new Title(this, translate("xuexi"), IQSanComponentSkin::QSanSimpleTextFont::_m_fontBank.key(G_COMMON_LAYOUT.graphicsBoxTitleFont.m_fontFace), Config.TinyFont.pixelSize());
+            newtitle->setParentItem(this);
+            titles << newtitle;
+            maxcardcount = qMax(maxcardcount, names10.length());
             ++maxrow;
         }
     }
@@ -365,6 +385,22 @@ void GuhuoBox::popup()
     }
     if (!names9.isEmpty()) {
         foreach (const QString &cardname, names9) {
+            CardButton *button = new CardButton(this, cardname, scale);
+            connect(button, &CardButton::clicked, this, &GuhuoBox::reply);
+
+            QPointF apos;
+            apos.setX(interval + x * buttonWidth + app);
+            apos.setY(topBlankWidth + (defaultButtonHeight + interval) * (y - 1) + titleWidth * y);
+            ++x;
+
+            button->setPos(apos);
+            buttons << button;
+        }
+        ++y;
+        x = 0;
+    }
+    if (!names10.isEmpty()) {
+        foreach (const QString &cardname, names10) {
             CardButton *button = new CardButton(this, cardname, scale);
             connect(button, &CardButton::clicked, this, &GuhuoBox::reply);
 

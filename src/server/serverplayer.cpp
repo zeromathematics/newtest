@@ -28,6 +28,7 @@
 #include "json.h"
 #include "gamerule.h"
 #include "roomthread.h"
+#include "clientplayer.h"
 
 using namespace QSanProtocol;
 
@@ -212,6 +213,12 @@ int ServerPlayer::getMaxCards(MaxCardsType::MaxCardsCount type) const
     return qMax(origin, 0);
 }
 
+void ServerPlayer::fillHandCards(int n, const QString &reason)
+{
+    if (isAlive() && n > getHandcardNum())
+        drawCards(n - getHandcardNum(), reason);
+}
+
 void ServerPlayer::drawCards(int n, const QString &reason)
 {
     room->drawCards(this, n, reason);
@@ -308,12 +315,14 @@ int ServerPlayer::getPlayerNumWithSameKingdom(const QString &reason, const QStri
     foreach (ServerPlayer *p, players) {
         if (!p->hasShownOneGeneral())
             continue;
-        if (p->getRole() == "careerist") { // if player is careerist, DO NOT COUNT AS SOME KINGDOM!!!!!
+        /*if (p->getRole() == "careerist") { // if player is careerist, DO NOT COUNT AS SOME KINGDOM!!!!!
             if (to_calculate == "careerist")
                 num = 1;
             continue;
         }
         if (p->getKingdom() == to_calculate)
+            ++num;*/
+        if ((p->isFriendWith(this) && getKingdom() == to_calculate)|| p->getKingdom() == to_calculate)
             ++num;
     }
 
@@ -1273,9 +1282,9 @@ void ServerPlayer::loseAllMarks(const QString &mark_name)
     loseMark(mark_name, getMark(mark_name));
 }
 
-void ServerPlayer::removeCurrentClub(){
-    if (hasClub()){
-        QString club_name = getClubName();
+void ServerPlayer::removeCurrentClub(const QString &club_name){
+    if (hasClub(club_name)){
+        //QString club_name = getClubName();
         LogMessage log;
         log.type = "$quit_club";
         log.from = this;
@@ -1286,7 +1295,7 @@ void ServerPlayer::removeCurrentClub(){
 }
 
 void ServerPlayer::addClub(const QString &club_name){
-    removeCurrentClub();
+    //removeCurrentClub();
     LogMessage log;
     log.type = "$join_club";
     log.from = this;
@@ -1864,7 +1873,12 @@ void ServerPlayer::showGeneral(bool head_general, bool trigger_event, bool sendL
         foreach(ServerPlayer *p, room->getOtherPlayers(this, true))
             room->notifyProperty(p, this, "head_skin_id");
 
-        if (!hasShownGeneral2()) {
+        if (getGeneral()->getKingdom() == "careerist" || getRole() == "careerist") {
+            if (getGeneral()->getKingdom() == "careerist" && property("CareeristFriend").toString().isEmpty())
+                setKingdom("careerist");
+            room->setPlayerProperty(this, "role", "careerist");
+        }
+        else if (!hasShownGeneral2()) {
             QString kingdom = getKingdom() != getGeneral()->getKingdom() ? getKingdom() : getGeneral()->getKingdom();
             room->setPlayerProperty(this, "kingdom", kingdom);
 
@@ -1893,7 +1907,7 @@ void ServerPlayer::showGeneral(bool head_general, bool trigger_event, bool sendL
         if (isLord()) {
             QString kingdom = getKingdom();
             foreach (ServerPlayer *p, room->getPlayers()) {
-                if (p->getKingdom() == kingdom && p->getRole() == "careerist") {
+                if (p->getKingdom() == kingdom && p->getRole() == "careerist" && p->property("CareeristFriend").toString().isEmpty()) {
                     room->setPlayerProperty(p, "role", HegemonyMode::GetMappedRole(kingdom));
                     room->broadcastProperty(p, "kingdom");
                 }
@@ -1933,7 +1947,9 @@ void ServerPlayer::showGeneral(bool head_general, bool trigger_event, bool sendL
         foreach(ServerPlayer *p, room->getOtherPlayers(this, true))
             room->notifyProperty(p, this, "deputy_skin_id");
 
-        if (!hasShownGeneral1()) {
+        if (getRole() == "careerist") {
+            room->setPlayerProperty(this, "role", "careerist");
+        }else if (!hasShownGeneral1()) {
             QString kingdom = getKingdom() != getGeneral()->getKingdom() ? getKingdom() : getGeneral()->getKingdom();
             room->setPlayerProperty(this, "kingdom", kingdom);
 
@@ -1999,6 +2015,10 @@ void ServerPlayer::hideGeneral(bool head_general)
         arg << false;
         arg << false;
         room->doBroadcastNotify(S_COMMAND_LOG_EVENT, arg);
+
+        //for picture adjust
+        setHeadSkinId(0);
+
         room->changePlayerGeneral(this, "anjiang");
 
         disconnectSkillsFromOthers();
@@ -2015,8 +2035,8 @@ void ServerPlayer::hideGeneral(bool head_general)
         }
 
         if (!hasShownGeneral2()) {
-            room->setPlayerProperty(this, "kingdom", "god");
-            room->setPlayerProperty(this, "role", HegemonyMode::GetMappedRole("god"));
+            //room->setPlayerProperty(this, "kingdom", "god");
+            //room->setPlayerProperty(this, "role", HegemonyMode::GetMappedRole("god"));
         }
     } else {
         if (getGeneral2Name() == "anjiang") return;
@@ -2035,6 +2055,10 @@ void ServerPlayer::hideGeneral(bool head_general)
         arg << true;
         arg << false;
         room->doBroadcastNotify(S_COMMAND_LOG_EVENT, arg);
+
+        //for picture adjust
+        setDeputySkinId(0);
+
         room->changePlayerGeneral2(this, "anjiang");
 
         disconnectSkillsFromOthers(false);
@@ -2051,8 +2075,8 @@ void ServerPlayer::hideGeneral(bool head_general)
         }
 
         if (!hasShownGeneral1()) {
-            room->setPlayerProperty(this, "kingdom", "god");
-            room->setPlayerProperty(this, "role", HegemonyMode::GetMappedRole("god"));
+            //room->setPlayerProperty(this, "kingdom", "god");
+            //room->setPlayerProperty(this, "role", HegemonyMode::GetMappedRole("god"));
         }
     }
 
@@ -2093,6 +2117,10 @@ void ServerPlayer::hideGeneralWithoutChangingRole(bool head_general)
         arg << false;
         arg << false;
         room->doBroadcastNotify(S_COMMAND_LOG_EVENT, arg);
+
+        //for picture adjust
+        setHeadSkinId(0);
+
         room->changePlayerGeneral(this, "anjiang");
 
         disconnectSkillsFromOthers();
@@ -2125,6 +2153,10 @@ void ServerPlayer::hideGeneralWithoutChangingRole(bool head_general)
         arg << true;
         arg << false;
         room->doBroadcastNotify(S_COMMAND_LOG_EVENT, arg);
+
+        //for picture adjust
+        setDeputySkinId(0);
+
         room->changePlayerGeneral2(this, "anjiang");
 
         disconnectSkillsFromOthers(false);

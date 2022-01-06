@@ -196,7 +196,7 @@
     <message>
         <location filename="../src/ui/cardcontainer.cpp" line="46"/>
         <source>QSanguosha-Hegemony</source>
-        <translation>太阳神三国杀·国战</translation>
+        <translation>动漫杀·国战</translation>
     </message>
 </context>
 <context>
@@ -2145,7 +2145,7 @@
         <location filename="../src/dialog/mainwindow.ui" line="14"/>
         <location filename="../src/dialog/mainwindow.cpp" line="582"/>
         <source>Sanguosha</source>
-        <translation>太阳神三国杀·国战</translation>
+        <translation>动漫杀·国战</translation>
     </message>
     <message>
         <location filename="../src/dialog/mainwindow.ui" line="41"/>
@@ -2550,7 +2550,7 @@
     <message>
         <location filename="../src/dialog/mainwindow.cpp" line="1064"/>
         <source>QSanguosha Replay File(*.qsgs)</source>
-        <translation>太阳神三国杀回放文件(*.qsgs)</translation>
+        <translation>动漫杀回放文件(*.qsgs)</translation>
     </message>
     <message>
         <location filename="../src/dialog/mainwindow.cpp" line="1109"/>
@@ -2640,7 +2640,7 @@
     <message>
         <location filename="../src/dialog/mainwindow.cpp" line="151"/>
         <source>QSanguosha-Hegemony</source>
-        <translation>太阳神三国杀·国战</translation>
+        <translation>动漫杀·国战</translation>
     </message>
     <message>
         <location filename="../src/dialog/mainwindow.cpp" line="244"/>
@@ -2728,7 +2728,7 @@
         <location filename="../src/dialog/mainwindow.cpp" line="669"/>
         <location filename="../src/dialog/mainwindow.cpp" line="1111"/>
         <source>QSanguosha Replay File(*.qsgs);; Image replay file (*.png)</source>
-        <translation>太阳神三国杀回放文件(*.qsgs);; 图片回放文件(*.png)</translation>
+        <translation>动漫杀回放文件(*.qsgs);; 图片回放文件(*.png)</translation>
     </message>
     <message>
         <location filename="../src/dialog/mainwindow.cpp" line="1200"/>
@@ -2892,7 +2892,7 @@
     <message>
         <location filename="../src/main.cpp" line="148"/>
         <source>Game data not found, please download QSanguosha-For-Hegemony PC version, and put the files and folders into /sdcard/Android/data/org.qsgsrara.qsanguosha</source>
-        <translation>未找到游戏数据，请下载太阳神三国杀·国战PC版，并将其中的文件及文件夹移入/sdcard/Android/data/org.qsgsrara.qsanguosha目录</translation>
+        <translation>未找到游戏数据，请下载动漫杀·国战PC版，并将其中的文件及文件夹移入/sdcard/Android/data/org.qsgsrara.qsanguosha目录</translation>
     </message>
     <message>
         <location filename="../src/main.cpp" line="150"/>
@@ -3281,7 +3281,7 @@
     <message>
         <location filename="../src/ui/roomscene.cpp" line="323"/>
         <source>QSanguosha</source>
-        <translation>太阳神三国杀·国战</translation>
+        <translation>动漫杀·国战</translation>
     </message>
     <message>
         <location filename="../src/ui/roomscene.cpp" line="385"/>
@@ -3411,7 +3411,7 @@
     <message>
         <location filename="../src/ui/roomscene.cpp" line="3220"/>
         <source>QSanguosha Replay File(*.qsgs)</source>
-        <translation>太阳神三国杀回放文件(*.qsgs)</translation>
+        <translation>动漫杀回放文件(*.qsgs)</translation>
     </message>
     <message>
         <location filename="../src/ui/roomscene.cpp" line="3352"/>
@@ -3776,6 +3776,16 @@ P = 你自己, R = 你所在的房间</translation>
         <location filename="../src/dialog/serverdialog.cpp" line="331"/>
         <source>The first player to show general can draw 2 cards</source>
         <translation>首亮摸2张牌作为奖励</translation>
+    </message>
+	<message>
+        <location filename="../src/dialog/serverdialog.cpp" line="371"/>
+        <source>View next player deputy general</source>
+        <translation>查看下家的副人物牌</translation>
+    </message>
+	<message>
+        <location filename="../src/dialog/serverdialog.cpp" line="371"/>
+        <source>Activate Special Card Mode</source>
+        <translation>启用特殊卡牌模式</translation>
     </message>
     <message>
         <location filename="../src/dialog/serverdialog.cpp" line="338"/>
@@ -4170,6 +4180,16 @@ P = 你自己, R = 你所在的房间</translation>
         <location filename="../src/ui/startscene.cpp" line="297"/>
         <source>The reward of showing general first is enabled</source>
         <translation>首亮奖励已开启</translation>
+    </message>
+	<message>
+        <location filename="../src/ui/startscene.cpp" line="303"/>
+        <source>view next player deputy general is enabled</source>
+        <translation>查看下家的副人物牌已开启</translation>
+    </message>
+	<message>
+        <location filename="../src/ui/startscene.cpp" line="303"/>
+        <source>activate special card mode is enabled</source>
+        <translation>特殊卡牌模式已开启</translation>
     </message>
     <message>
         <location filename="../src/ui/startscene.cpp" line="300"/>

@@ -99,6 +99,7 @@ public:
     QString getSkinNameById(const int skinId);
     void tryLoadingSkinTranslation(const int skinId) const;
     QString getTitle(const int skinId = 0) const;
+    QString getAnime() const;
 
 public slots:
     void lastWord(const int skinId) const;

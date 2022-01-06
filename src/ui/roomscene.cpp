@@ -521,7 +521,32 @@ void RoomScene::handleGameEvent(const QVariant &args)
             QString postion;
             if (player && arg.size() >= 6 && JsonUtils::isString(arg[5]))
                 postion = arg[5].toString();
-            Sanguosha->playAudioEffect(G_ROOM_SKIN.getPlayerAudioEffectPath(skillName, category, type, player, postion));
+            QString fileName = G_ROOM_SKIN.getPlayerAudioEffectPath(skillName, category, type, player, postion);
+
+            if (QFile::exists(fileName)){
+               Sanguosha->playAudioEffect(G_ROOM_SKIN.getPlayerAudioEffectPath(skillName, category, type, player, postion));
+            }
+            /*else{
+               if (type >0 && QFile::exists(QString("audio/skill/%1%2.ogg").arg(skillName).arg(QString::number(type)))){
+
+                  Sanguosha->playAudioEffect(QString("audio/skill/%1%2.ogg").arg(skillName).arg(QString::number(type)));
+               }
+               else if (QFile::exists(QString("audio/skill/%1.ogg").arg(skillName)) ){
+                  Sanguosha->playAudioEffect(QString("audio/skill/%1.ogg").arg(skillName));
+               }
+               else if(type < 0){
+                   int n = 0;
+                   for (int i = 1; i<999; i++){
+                       if ( QFile::exists(QString("audio/skill/%1%2.ogg").arg(skillName).arg(QString::number(i)))){
+                           n = n+1;
+                       }
+                       else{
+                           break;
+                       }
+                   }
+                   Sanguosha->playAudioEffect(QString("audio/skill/%1%2.ogg").arg(skillName).arg(QString::number(rand()%n+1)));
+               }
+            }*/
             break;
         }
         case S_GAME_EVENT_JUDGE_RESULT: {
@@ -764,6 +789,10 @@ QGraphicsItem *RoomScene::createDashboardButtons()
     connect(ok_button, &QSanButton::clicked, this, &RoomScene::doOkButton);
     connect(cancel_button, &QSanButton::clicked, this, &RoomScene::doCancelButton);
     connect(discard_button, &QSanButton::clicked, this, &RoomScene::doDiscardButton);
+
+    //skin_button = new QSanButton("platter", "skin", widget);
+    //skin_button->setRect(G_DASHBOARD_LAYOUT.m_skinButtonArea);
+    //connect(skin_button, SIGNAL(clicked()), this, SLOT(doSkinChangeButton()));
 
     // set them all disabled
     ok_button->setEnabled(false);
@@ -4232,7 +4261,7 @@ void RoomScene::onGameStart()
 
 void RoomScene::freeze()
 {
-    stopHeroSkinChangingAnimations();
+    //stopHeroSkinChangingAnimations();
 
     dashboard->setEnabled(false);
     dashboard->stopHuaShen();

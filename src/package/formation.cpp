@@ -1535,14 +1535,14 @@ public:
         kingdom_list << "careerist";
         bool broken = false;
         int n = dfowner->getPlayerNumWithSameKingdom("AI", QString(), MaxCardsType::Min); // could be canceled later
-        foreach (const QString &kingdom, Sanguosha->getKingdoms()) {
-            if (kingdom == "god") continue;
+        foreach (auto p, room->getOtherPlayers(dfowner)) {
+            /*if (kingdom == "god") continue;
             if (dfowner->getRole() == "careerist") {
                 if (kingdom == "careerist")
                     continue;
             } else if (dfowner->getKingdom() == kingdom)
-                continue;
-            int other_num = dfowner->getPlayerNumWithSameKingdom("AI", kingdom, MaxCardsType::Normal);
+                continue;*/
+            int other_num = p->getPlayerNumWithSameKingdom("AI", p->getKingdom(), MaxCardsType::Normal);
             if (other_num > 0 && other_num < n) {
                 broken = true;
                 break;

@@ -675,8 +675,12 @@ void BurningCamps::onUse(Room *room, const CardUseStruct &card_use) const
         } else
             new_use.to << splayer;
     }
-
-    TrickCard::onUse(room, new_use);
+    if (!card_use.to.isEmpty()){
+       TrickCard::onUse(room, card_use);
+    }
+    else {
+        TrickCard::onUse(room, new_use);
+    }
 }
 
 void BurningCamps::onEffect(const CardEffectStruct &effect) const

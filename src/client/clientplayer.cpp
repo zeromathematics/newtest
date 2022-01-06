@@ -263,7 +263,7 @@ void ClientPlayer::setMark(const QString &mark, int value)
     if (mark == "@duanchang")
         emit duanchang_invoked();
 
-    if (mark == "@companion" || mark == "@halfmaxhp" || mark == "@firstshow" || mark == "animeshana") // for event cards
+    if (mark == "@companion" || mark == "@halfmaxhp" || mark == "@firstshow" || mark == "@careerist" || mark == "animeshana") // for event cards
         emit update_markcard();
 }
 

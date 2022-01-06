@@ -51,6 +51,24 @@ QString Package::getCompanionSkill(const QString &general1, const QString &gener
     return "";
 }
 
+void Package::insertRelatedAttachSkill(const QString skill, const QString skill_attach)
+{
+    related_attachskills << skill+"+"+skill_attach;
+}
+
+QString Package::getRelatedAttachSkill(const QString skill)
+{
+    foreach(QString s,related_attachskills){
+        QStringList names=s.split("+");
+        if (names.contains(skill)){
+            names.removeOne(skill);
+            if (names.length()==1)
+                return names.at(0);
+        }
+    }
+    return "";
+}
+
 Package::~Package()
 {
     foreach (const Skill *skill, skills)

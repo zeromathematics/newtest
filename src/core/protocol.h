@@ -190,7 +190,9 @@ namespace QSanProtocol
         S_GAME_EVENT_SKILL_INVOKED,
         S_GAME_EVENT_PAUSE,
         S_GAME_EVENT_REVEAL_PINDIAN,
-        S_GAME_EVENT_HUASHEN
+        S_GAME_EVENT_HUASHEN,
+
+        S_GAME_EVENT_SKIN_CHANGED,
     };
 
     enum AnimateType

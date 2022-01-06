@@ -422,3 +422,17 @@ QString General::getTitle(const int skinId) const
     }
     return title;
 }
+
+QString General::getAnime() const
+{
+    QString anime;
+    anime = Sanguosha->translate("@" + objectName());
+
+    if (anime.startsWith("@")) {
+        if (objectName().contains("_")) {
+            const QString generalName = objectName().split("_").last();
+            anime = Sanguosha->translate(("@") + generalName);
+        }
+    }
+    return anime;
+}

@@ -1485,7 +1485,7 @@ void Dashboard::updateMarkCard()
 {
     //CompanionCard
     /*QStringList mark_names, mark_cards;
-    mark_names << "@companion" << "@halfmaxhp" << "@firstshow" << "animeshana";
+    mark_names << "@companion" << "@halfmaxhp" << "@firstshow" << "@careerist" <<"animeshana";
     mark_cards << "CompanionCard" << "HalfMaxHpCard" << "FirstShowCard";
     mark_cards << "AnimeShanaCard";
 

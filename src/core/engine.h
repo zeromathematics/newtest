@@ -45,6 +45,7 @@ class LuaTrickCard;
 class LuaWeapon;
 class LuaArmor;
 class LuaTreasure;
+//class QVersionNumber;
 
 struct lua_State;
 
@@ -91,6 +92,7 @@ public:
     QString getVersion() const;
     QString getVersionName() const;
     QString getMODName() const;
+    //QVersionNumber getQVersionNumber() const;
     QStringList getExtensions() const;
     QStringList getKingdoms() const;
     QColor getKingdomColor(const QString &kingdom) const;
@@ -133,6 +135,9 @@ public:
     QList<const TriggerSkill *> getGlobalTriggerSkills() const;
     QList<const AttackRangeSkill *> getAttackRangeSkills() const;
     void addSkills(const QList<const Skill *> &skills);
+
+    QStringList getAllSpecialCards() const;
+    void addSpecialCards(QString card);
 
     int getCardCount() const;
     const Card *getEngineCard(int cardId) const;
@@ -269,6 +274,8 @@ private:
     QMultiMap<QString, QString> sp_convert_pairs;
 
     TransferSkill *transfer;
+
+    QStringList specialcards;
 };
 
 static inline QVariant GetConfigFromLuaState(lua_State *L, const char *key)

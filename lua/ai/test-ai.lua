@@ -833,7 +833,7 @@ sgs.ai_skill_use_func.HeiyanCard = function(card,use,self)
 	local target
 	local source = self.player
 	for _,enemy in ipairs(self.enemies) do
-	    if self.player:getHp()>2 and not enemy:hasShownSkill("tianhuo") and not enemy:hasShownSkill("huansha") and not (enemy:getArmor() and ememy:getArmor():objectName()=="PeaceSpell") then
+	    if self.player:getHp()>2 and not enemy:hasShownSkill("tianhuo") and not enemy:hasShownSkill("huansha") and not (enemy:getArmor() and enemy:getArmor():objectName()=="PeaceSpell") then
 		  target = enemy
 		end
 	end
@@ -3260,7 +3260,7 @@ end
 
 sgs.ai_skill_invoke.wunian = function(self, data)
   local use = data:toCardUse()
-  if self:willShowForDefence() and self:isEnemy(use.from) and (use.card and not use.card:isKindOf("AmazingGrace")) and (use.card and not use.card:isKindOf("GodSalvation")) then return true end
+  if self:willShowForDefence() and (not use.from or self:isEnemy(use.from)) and (use.card and not use.card:isKindOf("AmazingGrace")) and (use.card and not use.card:isKindOf("GodSalvation")) then return true end
   return false
 end
 

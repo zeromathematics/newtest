@@ -264,6 +264,7 @@ public:
         QRect m_cancelButtonArea;
         QRect m_discardButtonArea;
         QRect m_trustButtonArea;
+        QRect m_skinButtonArea; //new
         QSize m_skillButtonsSize[3];
         QRect m_skillTextArea[3];
         QRect m_skillTextAreaDown[3];

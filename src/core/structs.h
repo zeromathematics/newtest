@@ -611,6 +611,8 @@ enum TriggerEvent
     GeneralShown, // For Official Hegemony mode
     GeneralHidden, // For Official Hegemony mode
     GeneralRemoved, // For Official Hegemony mode
+    GeneralTransformed, // For Official Hegemony mode
+    GeneralRevived, // For Official Hegemony mode
 
     DFDebut, // for Dragon Phoenix Debut
 

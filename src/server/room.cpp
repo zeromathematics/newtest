@@ -271,12 +271,13 @@ void Room::enterDying(ServerPlayer *player, DamageStruct *reason)
     if (player->isAlive()) {
         if (player->getHp() > 0) {
             setPlayerFlag(player, "-Global_Dying");
-        } else {
+        } else{
             LogMessage log;
             log.type = "#AskForPeaches";
             log.from = player;
             log.to = getAllPlayers();
-            log.arg = QString::number(1 - player->getHp());
+            int n = qMax(1, 1 - player->getHp());
+            log.arg = QString::number(n);
             sendLog(log);
 
             foreach (ServerPlayer *saver, getAllPlayers()) {
@@ -335,6 +336,8 @@ void Room::revivePlayer(ServerPlayer *player)
 
     doBroadcastNotify(S_COMMAND_REVIVE_PLAYER, player->objectName());
     updateStateItem();
+
+    thread->trigger(GeneralRevived, this,  player);
 }
 
 static bool CompareByRole(ServerPlayer *player1, ServerPlayer *player2)
@@ -600,7 +603,7 @@ void Room::attachSkillToPlayer(ServerPlayer *player, const QString &skill_name)
     const Skill *skill = Sanguosha->getSkill(skill_name);
 
     if (skill && skill->isVisible()) {
-        if (skill->getFrequency() == Skill::Club && !skill->getClubName().isEmpty())
+        if (skill->getFrequency() == Skill::Club && !skill->getClubName().isEmpty()&&!player->hasClub(skill->getClubName()))
             player->addClub(skill->getClubName());
     }
     doNotify(player, S_COMMAND_ATTACH_SKILL, skill_name);
@@ -706,7 +709,7 @@ void Room::handleAcquireDetachSkills(ServerPlayer *player, const QStringList &sk
             if (skill->getFrequency() == Skill::Limited && !skill->getLimitMark().isEmpty())
                 setPlayerMark(player, skill->getLimitMark(), 1);
 
-            if (skill->getFrequency() == Skill::Club && !skill->getClubName().isEmpty())
+            if (skill->getFrequency() == Skill::Club && !skill->getClubName().isEmpty()&&!player->hasClub(skill->getClubName()))
                 player->addClub(skill->getClubName());
 
             if (skill->isVisible()) {
@@ -2397,7 +2400,7 @@ void Room::setPlayerProperty(ServerPlayer *player, const char *property_name, co
 
 void Room::setPlayerMark(ServerPlayer *player, const QString &mark, int value)
 {
-    if (mark.startsWith("@amclub_")){
+    /*if (mark.startsWith("@amclub_")){
         if (value > 0){
             foreach(QString pmark, player->getMarkNames()){
                 if (pmark.startsWith("@amclub_")){
@@ -2407,7 +2410,7 @@ void Room::setPlayerMark(ServerPlayer *player, const QString &mark, int value)
         }
         if (value > 1)
             value = 1;
-    }
+    }*/
     player->setMark(mark, value);
 
     JsonArray arg;
@@ -2436,7 +2439,7 @@ void Room::removePlayerMark(ServerPlayer *player, const QString &mark, int remov
 void Room::clearClub(const QString &club_name){
     foreach(ServerPlayer *p, getAlivePlayers()){
         if (p->hasClub(club_name)){
-            p->removeCurrentClub();
+            p->removeCurrentClub(club_name);
         }
     }
 }
@@ -2910,9 +2913,11 @@ void Room::doDragonPhoenix(ServerPlayer *player, const QString &general1_name, c
         player->showGeneral(false, false, false);
 
     foreach(const Skill *skill, player->getSkillList()){
-        if (skill->getFrequency() == Skill::Club && !skill->getClubName().isEmpty())
+        if (skill->getFrequency() == Skill::Club && !skill->getClubName().isEmpty()&&!player->hasClub(skill->getClubName()))
             player->addClub(skill->getClubName());
     }
+
+    thread->trigger(GeneralTransformed, this, player);
 }
 
 void Room::transformDeputyGeneral(ServerPlayer *player)
@@ -2923,7 +2928,7 @@ void Room::transformDeputyGeneral(ServerPlayer *player)
     names << player->getActualGeneral1Name() << player->getActualGeneral2Name();
     QStringList available;
     foreach (QString name, Sanguosha->getLimitedGeneralNames())
-        if (!name.startsWith("lord_") && !used_general.contains(name) && Sanguosha->getGeneral(name)->getKingdom() == player->getKingdom())
+        if (!name.startsWith("lord_") && !used_general.contains(name) && (Sanguosha->getGeneral(name)->getKingdom().split("|").contains(player->getKingdom()) || player->getKingdom() == "careerist") && Sanguosha->getGeneral(name)->getKingdom() != "careerist" )
             available << name;
     if (available.isEmpty()) return;
 
@@ -2974,9 +2979,13 @@ void Room::transformDeputyGeneral(ServerPlayer *player)
             skill->effect(GameStart, this, player, void_data, player);
     }
 
-    if (Sanguosha->getGeneral(names[0])->isCompanionWith(general_name))
-        setPlayerMark(player, "CompanionEffect", 1);
+    /*if (Sanguosha->getGeneral(names[0])->isCompanionWith(general_name))
+        setPlayerMark(player, "CompanionEffect", 1);*/
     player->showGeneral(false, true, true);
+
+    QVariant string;
+    string = names[1]+":"+general_name;
+    thread->trigger(GeneralTransformed, this, player, string);
 }
 
 void Room::transformHeadGeneral(ServerPlayer *player)
@@ -2987,7 +2996,7 @@ void Room::transformHeadGeneral(ServerPlayer *player)
     names << player->getActualGeneral1Name() << player->getActualGeneral2Name();
     QStringList available;
     foreach (QString name, Sanguosha->getLimitedGeneralNames())
-        if (!name.startsWith("lord_") && !used_general.contains(name) && Sanguosha->getGeneral(name)->getKingdom() == player->getKingdom())
+        if (!name.startsWith("lord_") && !used_general.contains(name) && Sanguosha->getGeneral(name)->getKingdom().split("|").contains(player->getKingdom()) && player->getKingdom() != "careerist")
             available << name;
     if (available.isEmpty()) return;
 
@@ -3041,6 +3050,10 @@ void Room::transformHeadGeneral(ServerPlayer *player)
     if (Sanguosha->getGeneral(names[1])->isCompanionWith(general_name))
         setPlayerMark(player, "CompanionEffect", 1);
     player->showGeneral(true, true, true);
+
+    QVariant string;
+    string = names[0]+":"+general_name;
+    thread->trigger(GeneralTransformed, this, player, string);
 }
 
 void Room::transformDeputyGeneralTo(ServerPlayer *player, QString general_name)
@@ -3101,6 +3114,10 @@ void Room::transformDeputyGeneralTo(ServerPlayer *player, QString general_name)
     if (Sanguosha->getGeneral(names[0])->isCompanionWith(general_name))
         setPlayerMark(player, "CompanionEffect", 1);
     player->showGeneral(false, true, true);
+
+    QVariant string;
+    string = names[1]+":"+general_name;
+    thread->trigger(GeneralTransformed, this, player, string);
 }
 
 void Room::transformHeadGeneralTo(ServerPlayer *player, QString general_name)
@@ -3161,6 +3178,10 @@ void Room::transformHeadGeneralTo(ServerPlayer *player, QString general_name)
     if (Sanguosha->getGeneral(names[1])->isCompanionWith(general_name))
         setPlayerMark(player, "CompanionEffect", 1);
     player->showGeneral(true, true, true);
+
+    QVariant string;
+    string = names[0]+":"+general_name;
+    thread->trigger(GeneralTransformed, this, player, string);
 }
 
 void Room::handleUsedGeneral(const QString &general)
@@ -3620,7 +3641,7 @@ void Room::assignGeneralsForPlayers(const QList<ServerPlayer *> &to_assign)
             existed << player->getGeneral2Name();
     }
 
-    const int max_choice = Config.value("HegemonyMaxChoice", 7).toInt();
+    const int max_choice = Config.value("HegemonyMaxChoice", 9).toInt();
     const int total = Sanguosha->getGeneralCount();
     const int max_available = (total - existed.size()) / to_assign.length();
     const int choice_count = qMin(max_choice, max_available);
@@ -3681,7 +3702,12 @@ void Room::chooseGenerals(QList<ServerPlayer *> &to_assign, bool has_assign, boo
         QStringList names;
         if (player->getGeneral()) {
             QString name = player->getGeneralName();
-            QString role = HegemonyMode::GetMappedRole(player->getGeneral()->getKingdom());
+            QString kingdom = player->getGeneral()->getKingdom();
+            if (player->getGeneral()->getKingdom() == "careerist" && player->getGeneral2() && !player->getGeneral2()->getKingdom().contains("|"))
+                kingdom = player->getGeneral2()->getKingdom();
+            if (kingdom.contains("|") && !player->getGeneral2()->getKingdom().contains("|"))
+                kingdom = player->getGeneral2()->getKingdom();
+            QString role = HegemonyMode::GetMappedRole(kingdom);
             if (role.isEmpty())
                 role = player->getGeneral()->getKingdom();
             names.append(name);
@@ -5709,7 +5735,7 @@ void Room::acquireSkill(ServerPlayer *player, const Skill *skill, bool open, boo
 
     if (skill->getFrequency() == Skill::Limited && !skill->getLimitMark().isEmpty())
         setPlayerMark(player, skill->getLimitMark(), 1);
-    if (skill->getFrequency() == Skill::Club && !skill->getClubName().isEmpty())
+    if (skill->getFrequency() == Skill::Club && !skill->getClubName().isEmpty()&&!player->hasClub(skill->getClubName()))
         player->addClub(skill->getClubName());
 
     if (skill->isVisible()) {
@@ -7134,6 +7160,7 @@ void Room::makeReviving(const QString &name)
     revivePlayer(player);
     setPlayerProperty(player, "maxhp", player->getGeneralMaxHp());
     setPlayerProperty(player, "hp", player->getMaxHp());
+
 }
 
 void Room::fillAG(const QList<int> &card_ids, ServerPlayer *who, const QList<int> &disabled_ids, QList<ServerPlayer *> watchers)

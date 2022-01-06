@@ -233,7 +233,7 @@ void GeneralSelector::calculateDeputyValue(const ServerPlayer *player, const QSt
             }
 
 
-            if (!common|| general2->isLord()) continue;
+            if ((!common|| general2->isLord()) && kingdom != "careerist") continue;
             const int general2_value = m_singleGeneralTable.value(second, 0);
             int v = m_singleGeneralTable.value(first, 0) + general2_value;
 
@@ -245,13 +245,16 @@ void GeneralSelector::calculateDeputyValue(const ServerPlayer *player, const QSt
 
             if (general1->isCompanionWith(second)) v += 3;
 
-            if (general1->isFemale()) {
-                if ("game" == kingdom)
-                    v -= 2;
-                else if (kingdom != "real")
+            //for jiasugaobai
+            if (general1->isMale()) {
+                if ("science" == kingdom)
                     v += 1;
-            } else if ("real" == kingdom)
-                v += 1;
+            }
+
+            //for mengfeng
+            if (general1->hasSkill("mengfeng")) {
+                v += 2;
+            }
 
             if (general1->hasSkill("baoling") && general2_value > 6) v -= 5;
 

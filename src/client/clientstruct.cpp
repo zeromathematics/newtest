@@ -52,7 +52,7 @@ time_t ServerInfoStruct::getCommandTimeout(QSanProtocol::CommandType command, QS
 
 bool ServerInfoStruct::parse(const QString &str)
 {
-    QRegExp rx("(.*):(@?\\w+):(\\d+):(\\d+):([\\w-]+(?:\\+[\\w-]+)*)?:([RCFAMS]*)");
+    QRegExp rx("(.*):(@?\\w+):(\\d+):(\\d+):([\\w-]+(?:\\+[\\w-]+)*)?:([RCFAMSVNZ]*)");
     if (!rx.exactMatch(str)) {
         // older version, just take the player count
         int count = str.split(":").at(1).toInt();
@@ -91,7 +91,9 @@ bool ServerInfoStruct::parse(const QString &str)
         ForbidAddingRobot = flags.contains("A");
         DisableChat = flags.contains("M");
         FirstShowingReward = flags.contains("S");
+        ViewNextPlayerDeputyGeneral = flags.contains("V");
         EventcardMode = flags.contains("E");
+        ActivateSpecialCardMode = flags.contains("N");
     }
 
     return true;
@@ -109,6 +111,8 @@ ServerInfoWidget::ServerInfoWidget(bool show_lack)
     free_choose_label = new QLabel;
     forbid_adding_robot_label = new QLabel;
     fisrt_showing_reward_label = new QLabel;
+    view_deputy_general_label = new QLabel;
+    active_special_card_mode_label = new QLabel;
     time_limit_label = new QLabel;
 
     list_widget = new QListWidget;
@@ -126,6 +130,8 @@ ServerInfoWidget::ServerInfoWidget(bool show_lack)
     layout->addRow(tr("Free choose"), free_choose_label);
     layout->addRow(tr("Forbid adding robot"), forbid_adding_robot_label);
     layout->addRow(tr("Enable First Showing Reward"), fisrt_showing_reward_label);
+    layout->addRow(tr("Enable View Deputy General"), view_deputy_general_label);
+    layout->addRow(tr("Enable Active Special Card Mode"), active_special_card_mode_label);
     layout->addRow(tr("Operation time"), time_limit_label);
     layout->addRow(tr("Extension packages"), list_widget);
 
@@ -152,6 +158,8 @@ void ServerInfoWidget::fill(const ServerInfoStruct &info, const QString &address
     free_choose_label->setText(info.FreeChoose ? tr("Enabled") : tr("Disabled"));
     forbid_adding_robot_label->setText(info.ForbidAddingRobot ? tr("Enabled") : tr("Disabled"));
     fisrt_showing_reward_label->setText(info.FirstShowingReward ? tr("Enabled") : tr("Disabled"));
+    view_deputy_general_label->setText(info.ViewNextPlayerDeputyGeneral ? tr("Enabled") : tr("Disabled"));
+    active_special_card_mode_label->setText(info.ActivateSpecialCardMode ? tr("Enabled") : tr("Disabled"));
 
     if (info.OperationTimeout == 0)
         time_limit_label->setText(tr("No limit"));
@@ -197,6 +205,8 @@ void ServerInfoWidget::clear()
     free_choose_label->clear();
     forbid_adding_robot_label->clear();
     fisrt_showing_reward_label->clear();
+    view_deputy_general_label->clear();
+    active_special_card_mode_label->clear();
     time_limit_label->clear();
     list_widget->clear();
 }

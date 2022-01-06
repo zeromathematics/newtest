@@ -132,6 +132,8 @@ private:
     QSpinBox *nullification_spinbox;
     QCheckBox *minimize_dialog_checkbox;
     QCheckBox *reward_the_first_showing_player_checkbox;
+    QCheckBox *view_next_player_deputy_general_checkbox;
+    QCheckBox *activate_special_card_mode_checkbox;
     QCheckBox *forbid_adding_robot_checkbox;
     QSpinBox *ai_delay_spinbox;
     QCheckBox *ai_delay_altered_checkbox;

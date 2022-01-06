@@ -41,9 +41,37 @@ sgs.ai_use_value.GuangyuCard = 6
 sgs.ai_keep_value.GuangyuCard = 6
 sgs.ai_card_intention.GuangyuCard = -60
 
+function SmartAI:useCardEireishoukan(card, use)
+    if not card:isAvailable(self.player) then return end
+	if not self:hasTrickEffective(card, self.player, self.player) then return end
+	use.card = card
+end
+sgs.ai_use_priority.Eireishoukan = 3
+sgs.ai_use_value.Eireishoukan = 6.5
+sgs.ai_keep_value.Eireishoukan = 3
+sgs.ai_card_intention.Eireishoukan= -60
+
+function SmartAI:useCardIsekai(card, use)
+    if not card:isAvailable(self.player) then return end
+	if not self:hasTrickEffective(card, self.player, self.player) then return end
+	use.card = card
+end
+sgs.ai_use_priority.Isekai = 0
+sgs.ai_use_value.Isekai = 6.5
+sgs.ai_keep_value.Isekai= 3
+sgs.ai_card_intention.Isekai= -60
 
 
-
+sgs.ai_skill_choice.isekai = function(self, choices, data)
+   local n = data:toInt()
+   local m = self.player:getMaxHp()
+   if n<=m then
+      return "draw_maxhpcards_recover"
+   end
+   if m<n then
+      return "draw_throwcards"
+   end
+end
 
 --for shifeng
 sgs.ai_skill_use["BasicCard+^Jink,TrickCard+^Nullification,EquipCard|.|.|hand"] = function(self, prompt, method)
@@ -1070,7 +1098,6 @@ sgs.ai_skill_playerchosen.yinguo = function(self, targets)
 		end
 	end
 	if target then return target end
-	return targets:first()
 end
 
 local jiuzhu_skill={}
@@ -1124,12 +1151,12 @@ sgs.ai_skill_use["@@shexin"] = function(self, prompt)
 	self:sortByUseValue(cards,true)
 	self:sortByUseValue(equips,true)
 	for _,acard in ipairs(cards) do
-		if  acard:getSuitString()=="heart" then
+		if  acard:isRed() then
 			card =acard
 		end
 	end
 	for _,acard in ipairs(equips) do
-		if acard:getSuitString()=="heart"  then
+		if acard:isRed()  then
 			card =acard
 		end
 	end
@@ -1288,4 +1315,219 @@ end
 sgs.ai_skill_invoke.kuangzao= function(self, data)
    local damage = data:toDamage()
    return self:isEnemy(damage.to)
+end
+
+sgs.ai_skill_invoke.haoqi= function(self, data)
+   local use = data:toCardUse()
+   return self:isEnemy(use.from) or use.card:isRed()
+end
+
+local function add_different_kingdoms2(self, target, targets)
+   for _,p in ipairs(targets) do
+	 if target:isFriendWith(p) then return false end
+   end
+   return true
+end
+
+shouji_skill={}
+shouji_skill.name="shouji"
+table.insert(sgs.ai_skills,shouji_skill)
+shouji_skill.getTurnUseCard=function(self,inclusive)
+	if self.player:hasUsed("ShoujiCard") then return end
+	return sgs.Card_Parse("@ShoujiCard=.&shouji")
+end
+
+sgs.ai_skill_use_func.ShoujiCard = function(card,use,self)
+	local needed = {}
+	local hp = math.max(self.player:getHp(), 1)
+	local cards = sgs.QList2Table(self.player:getHandcards())
+	local equips = sgs.QList2Table(self.player:getEquips())
+	self:sortByUseValue(cards)
+	self:sortByUseValue(equips)
+	for _,acard in ipairs(cards) do
+		table.insert(needed, acard:getEffectiveId())
+			if #needed >= hp then
+				break
+			end
+	end
+	for _,acard in ipairs(equips) do
+			if #needed < hp then
+				table.insert(needed, acard:getEffectiveId())
+			end
+	end
+	
+	local targets = {}
+	for _,p in ipairs(self.enemies) do
+	  if #targets <hp and not p:isKongcheng() and add_different_kingdoms2(self, p, targets) then table.insert(targets, p) end
+	end
+
+   if #needed == hp and #targets >0  then
+	  use.card = sgs.Card_Parse("@ShoujiCard="..table.concat(needed,"+").."&shouji")
+	  if use.to then
+        for _,target in ipairs(targets) do	  
+	      use.to:append(target)
+		end
+	  end
+	  return
+   end
+end
+
+sgs.ai_use_value.ShoujiCard= 8
+sgs.ai_use_priority.ShoujiCard  = 5
+
+sgs.ai_skill_invoke.zhouli= function(self, data)
+   local damage = data:toDamage()
+   return (self:isEnemy(damage.from) and not damage.to:hasShownAllGenerals()) or (self:isFriend(damage.to) and self:isFriend(damage.from))
+end
+
+sgs.ai_skill_choice.zhouli = function(self, choices, data)
+   local damage = data:toDamage()
+   if self:isFriend(damage.to) and table.contains(choices:split("+"), "zhouli_prevent") then
+      return "zhouli_prevent"
+   end
+end
+
+sgs.ai_skill_invoke.zhenyan= function(self, data)
+   for _,p in ipairs(self.friends_noself) do
+	  if #self.room:getTag(p:objectName().."zhenyan"):toStringList()>0 then
+	    return true
+	  end
+   end
+end
+
+sgs.ai_skill_playerchosen.zhenyan = function(self, targets, max_num, min_num)
+  for _,p in ipairs(self.friends_noself) do
+	  if #self.room:getTag(p:objectName().."zhenyan"):toStringList()>0 then
+	    return p
+	  end
+   end
+end
+
+sgs.ai_skill_invoke.yuyue= function(self, data)
+   if self.player:hasShownSkill("yuyue") then return true end
+   return self:willShowForAttack() or self:willShowForDefence()
+end
+
+sgs.ai_skill_invoke.xianhai= function(self, data)
+   local damage = data:toDamage()
+   if not damage.from:isFriendWith(self.player) then
+     return true
+   end
+end
+
+sgs.ai_skill_playerchosen.xianhai= function(self, targets)
+	return self.player
+end
+
+sgs.ai_skill_invoke.wuren= function(self, data)
+   return self:willShowForAttack() or self:willShowForDefence()
+end
+
+sgs.ai_skill_invoke.weituo= function(self, data)
+   local damage = data:toDamage()
+   return self:isEnemy(damage.from) or self.player:willBeFriendWith(damage.from)
+end
+
+sgs.ai_skill_invoke.wushi= function(self, data)
+   return self:willShowForAttack() or self:willShowForDefence()
+end
+
+sgs.ai_skill_playerchosen.wushi= function(self, targets)
+    local result = {}
+	for _,name in sgs.qlist(targets) do
+		if  self:isEnemy(name) then table.insert(result, findPlayerByObjectName(name:objectName())) end
+	end
+	return result
+end
+
+sgs.ai_skill_invoke.zhuisha = function(self, data)
+	local use=data:toCardUse()
+	for _,p in sgs.qlist(use.to) do
+	  if (self:isEnemy(p) and not p:isNude()) then
+	    return true
+	  end
+	end
+end
+
+sgs.ai_skill_discard["zhuisha"] = function(self, discard_num, min_num, optional, include_equip)
+  return self:askForDiscard("discard", discard_num, min_num, false, include_equip)
+end
+
+sgs.ai_skill_invoke.songzang = function(self, data)
+	local damage=data:toDamage()
+	if self:isEnemy(damage.to) then
+	    return true
+	end
+end
+
+sgs.ai_skill_invoke.shashou = function(self, data)
+	local damage=data:toDamage()
+	if self:isEnemy(damage.to) then
+	    return true
+	end
+end
+
+sgs.ai_skill_invoke.xuexi = function(self, data)
+	return true
+end
+
+sgs.ai_skill_invoke.qinggan = function(self, data)
+	return true
+end
+
+sgs.ai_skill_cardask["@shengmu"] = function(self, data)
+  local damage = data:toDamage()
+  local can
+  if damage and self:isFriend(damage.to) then
+     if damage.to:isWounded() then
+	    can = true
+	 end
+  end
+  for _, c in sgs.qlist(self.player:getCards("he")) do
+	 if c:isRed() and can then
+		return "$" .. c:getEffectiveId()
+	 end
+  end
+  for _, c in sgs.qlist(self.player:getCards("he")) do
+	 if can then
+		return "$" .. c:getEffectiveId()
+	 end
+  end
+  return ""
+end
+
+sgs.ai_skill_invoke.fenjie = function(self, data)
+	local effect=data:toCardEffect()
+	if self:isEnemy(effect.to) and effect.to:getEquips():length()>0 then
+	    return true
+	end
+end
+
+sgs.ai_skill_invoke.jiaji = function(self, data)
+	return self:willShowForAttack() or self:willShowForDefence()
+end
+
+sgs.ai_view_as.gaoling = function(card, player, card_place)
+	local suit = card:getSuitString()
+	local number = card:getNumberString()
+	local card_id = card:getEffectiveId()
+	local ask = sgs.Sanguosha:getCurrentCardUsePattern()
+	if (card_place == sgs.Player_PlaceEquip or card_place == sgs.Player_PlaceHand) and ask ~= "jink" and player:getHandcardNum()==math.ceil(player:getHandcardNum()/2) * 2 then
+		return ("nullification:gaoling[%s:%s]=%d%s"):format(suit, number, card_id, "&gaoling")
+	end
+	if  (card_place == sgs.Player_PlaceEquip or card_place == sgs.Player_PlaceHand) and ask == "jink" and player:getHandcardNum()==math.ceil(player:getHandcardNum()/2) * 2 then
+		return ("jink:gaoling[%s:%s]=%d%s"):format(suit, number, card_id, "&gaoling")
+	end
+end
+
+sgs.ai_skill_choice.gaoling = function(self, choices, data)
+   return "draw1card"
+end
+
+sgs.ai_skill_invoke.bingdu = function(self, data)
+	return true
+end
+
+sgs.ai_skill_invoke.juewang = function(self, data)
+	return self:willShowForAttack()
 end

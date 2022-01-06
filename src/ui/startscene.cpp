@@ -296,6 +296,12 @@ void StartScene::printServerInfo()
     if (Config.RewardTheFirstShowingPlayer)
         serverLog->append(tr("The reward of showing general first is enabled"));
 
+    if (Config.ViewNextPlayerDeputyGeneral)
+        serverLog->append(tr("view next player deputy general is enabled"));
+
+    if (Config.ActivateSpecialCardMode)
+        serverLog->append(tr("activate special card mode is enabled"));
+
     if (!Config.ForbidAddingRobot) {
         serverLog->append(tr("This server is AI enabled, AI delay is %1 milliseconds").arg(Config.AIDelay));
     } else {

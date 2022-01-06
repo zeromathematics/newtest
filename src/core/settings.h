@@ -90,6 +90,8 @@ public:
     QStringList RemovedHiddenGenerals;
 
     bool RewardTheFirstShowingPlayer;
+    bool ViewNextPlayerDeputyGeneral;
+    bool ActivateSpecialCardMode;
 
     // client side
     QString HostAddress;

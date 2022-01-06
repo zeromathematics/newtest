@@ -64,6 +64,16 @@ public:
     virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
 };
 
+class CompanionCard : public SkillCard
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE CompanionCard();
+    virtual void extraCost(Room *room, const CardUseStruct &card_use) const;
+    virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
+};
+
 class HalfMaxHpCard : public SkillCard
 {
     Q_OBJECT
@@ -72,5 +82,48 @@ public:
     Q_INVOKABLE HalfMaxHpCard();
     virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
 };
+
+class FirstShowCard : public SkillCard
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE FirstShowCard();
+
+    virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
+    virtual bool targetsFeasible(const QList<const Player *> &targets, const Player *Self) const;
+    virtual void extraCost(Room *room, const CardUseStruct &card_use) const;
+    virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
+};
+
+class CareermanCard : public SkillCard
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE CareermanCard();
+    virtual void extraCost(Room *room, const CardUseStruct &card_use) const;
+    virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
+};
+
+/*class ShowHeadCard : public SkillCard
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE ShowHeadCard();
+
+    const Card *validate(CardUseStruct &card_use) const;
+};
+
+class ShowDeputyCard : public SkillCard
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE ShowDeputyCard();
+
+    const Card *validate(CardUseStruct &card_use) const;
+};*/
 
 #endif

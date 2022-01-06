@@ -109,7 +109,7 @@ sgs.shown_kingdom =         {
 sgs.ai_damage_effect =      {}
 sgs.ai_explicit =           {}
 sgs.ai_loyalty =            {
-    wei = {},
+    careerist = {},
 	science = {},
 	magic = {},
 	game = {},
@@ -123,14 +123,14 @@ sgs.RolesTable =            {
 	"careerist"
 }
 sgs.KingdomsTable =         {
-	"wei",   --第一个势力实战总是用魏狗打法，没弄明白原理。
+	"careerist",   --第一个势力实战总是用魏狗打法，没弄明白原理。
 	"science",
 	"magic",
 	"game",
 	"real"
 }
 sgs.current_mode_players = {
-    wei = 0,
+    careerist = 0,
 	science = 0,
 	magic = 0,
 	game = 0,
@@ -3189,6 +3189,7 @@ function SmartAI:hasHeavySlashDamage(from, slash, to, getValue)
 	local dmg = 1
 	local fireSlash = slash and (slash:isKindOf("FireSlash") or slash:objectName() == "slash" and from:hasWeapon("Fan"))
 	local thunderSlash = slash and slash:isKindOf("ThunderSlash")
+	local iceSlash = slash and slash:isKindOf("IceSlash")
 
 	if (slash and slash:hasFlag("drank")) then
 		dmg = dmg + 1

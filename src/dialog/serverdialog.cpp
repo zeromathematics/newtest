@@ -106,7 +106,7 @@ QWidget *ServerDialog::createBasicTab()
     hegemony_maxchoice_label = new QLabel(tr("Upperlimit for hegemony"));
     hegemony_maxchoice_spinbox = new QSpinBox;
     hegemony_maxchoice_spinbox->setRange(5, 7); //wait for a new extension
-    hegemony_maxchoice_spinbox->setValue(Config.value("HegemonyMaxChoice", 7).toInt());
+    hegemony_maxchoice_spinbox->setValue(Config.value("HegemonyMaxChoice", 9).toInt());
 #endif
 
     QPushButton *edit_button = new QPushButton(tr("Banlist ..."));
@@ -273,8 +273,8 @@ QWidget *ServerDialog::createAdvancedTab()
 #ifdef Q_OS_ANDROID
     hegemony_maxchoice_spinbox->setMinimumHeight(80);
 #endif
-    hegemony_maxchoice_spinbox->setRange(5, 7); //wait for a new extension
-    hegemony_maxchoice_spinbox->setValue(Config.value("HegemonyMaxChoice", 7).toInt());
+    hegemony_maxchoice_spinbox->setRange(5, 9); //wait for a new extension
+    hegemony_maxchoice_spinbox->setValue(Config.value("HegemonyMaxChoice", 9).toInt());
 #endif
     address_edit = new QLineEdit;
     address_edit->setText(Config.Address);
@@ -367,6 +367,12 @@ QWidget *ServerDialog::createMiscTab()
 
     reward_the_first_showing_player_checkbox = new QCheckBox(tr("The first player to show general can draw 2 cards"));
     reward_the_first_showing_player_checkbox->setChecked(Config.RewardTheFirstShowingPlayer);
+
+    view_next_player_deputy_general_checkbox = new QCheckBox(tr("View next player deputy general"));
+    view_next_player_deputy_general_checkbox->setChecked(Config.ViewNextPlayerDeputyGeneral);
+
+    activate_special_card_mode_checkbox = new QCheckBox(tr("Activate Special Card Mode"));
+    activate_special_card_mode_checkbox->setChecked(Config.ActivateSpecialCardMode);
 #if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID)
     QGroupBox *ai_groupbox = new QGroupBox(tr("Artificial intelligence"));
     ai_groupbox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -417,6 +423,8 @@ QWidget *ServerDialog::createMiscTab()
     tablayout->addLayout(HLay(minimize_dialog_checkbox, surrender_at_death_checkbox));
     tablayout->addLayout(HLay(luck_card_label, luck_card_spinbox));
     tablayout->addWidget(reward_the_first_showing_player_checkbox);
+    tablayout->addWidget(view_next_player_deputy_general_checkbox);
+    tablayout->addWidget(activate_special_card_mode_checkbox);
 #if !defined(Q_OS_IOS) && !defined(Q_OS_ANDROID)
     tablayout->addWidget(ai_groupbox);
 #endif
@@ -634,6 +642,8 @@ bool ServerDialog::config()
     Config.NullificationCountDown = nullification_spinbox->value();
     Config.EnableMinimizeDialog = minimize_dialog_checkbox->isChecked();
     Config.RewardTheFirstShowingPlayer = reward_the_first_showing_player_checkbox->isChecked();
+    Config.ViewNextPlayerDeputyGeneral = view_next_player_deputy_general_checkbox->isChecked();
+    Config.ActivateSpecialCardMode = activate_special_card_mode_checkbox->isChecked();
     Config.ForbidAddingRobot = forbid_adding_robot_checkbox->isChecked();
     Config.OriginAIDelay = ai_delay_spinbox->value();
     Config.AIDelay = Config.OriginAIDelay;
@@ -670,6 +680,8 @@ bool ServerDialog::config()
     Config.setValue("NullificationCountDown", nullification_spinbox->value());
     Config.setValue("EnableMinimizeDialog", Config.EnableMinimizeDialog);
     Config.setValue("RewardTheFirstShowingPlayer", Config.RewardTheFirstShowingPlayer);
+    Config.setValue("ViewNextPlayerDeputyGeneral", Config.ViewNextPlayerDeputyGeneral);
+    Config.setValue("ActivateSpecialCardMode", Config.ActivateSpecialCardMode);
     Config.setValue("ForbidAddingRobot", Config.ForbidAddingRobot);
     Config.setValue("OriginAIDelay", Config.OriginAIDelay);
     Config.setValue("AlterAIDelayAD", ai_delay_altered_checkbox->isChecked());

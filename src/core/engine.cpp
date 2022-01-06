@@ -41,6 +41,7 @@
 #include <QDir>
 #include <QFile>
 #include <QApplication>
+//#include <QVersionNumber>
 
 Engine *Sanguosha = NULL;
 
@@ -681,6 +682,11 @@ QString Engine::getVersionName() const
     return "Heg";
 }
 
+/*QVersionNumber Engine::getQVersionNumber() const
+{
+    return QVersionNumber(0, 10, 2);
+}*/
+
 QString Engine::getMODName() const
 {
     return "official";
@@ -804,6 +810,10 @@ QString Engine::getSetupString() const
         flags.append("S");
     if (Config.EventcardMode)
         flags.append("E");
+    if (Config.ViewNextPlayerDeputyGeneral)
+        flags.append("V");
+    if (Config.ActivateSpecialCardMode)
+        flags.append("N");
 
     QString server_name = Config.ServerName;
     QStringList setup_items;
@@ -1179,4 +1189,14 @@ int Engine::correctAttackRange(const Player *target, bool include_weapon, bool f
 QList<Card *> Engine::getCards() const
 {
     return cards;
+}
+
+QStringList Engine::getAllSpecialCards() const
+{
+    return specialcards;
+}
+
+void Engine::addSpecialCards(QString card)
+{
+    specialcards << card;
 }

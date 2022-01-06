@@ -46,6 +46,8 @@ struct ServerInfoStruct
     bool ForbidAddingRobot;
     bool DisableChat;
     bool FirstShowingReward;
+    bool ViewNextPlayerDeputyGeneral;
+    bool ActivateSpecialCardMode;
 
     bool DuringGame;
     bool EventcardMode;
@@ -77,6 +79,8 @@ private:
     QLabel *free_choose_label;
     QLabel *forbid_adding_robot_label;
     QLabel *fisrt_showing_reward_label;
+    QLabel *view_deputy_general_label;
+    QLabel *active_special_card_mode_label;
     QLabel *time_limit_label;
     QLabel *lack_label;
     QListWidget *list_widget;

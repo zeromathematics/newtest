@@ -203,7 +203,11 @@ bool Collateral::targetFilter(const QList<const Player *> &targets,
 
 void Collateral::onUse(Room *room, const CardUseStruct &card_use) const
 {
-    Q_ASSERT(card_use.to.length() == 2);
+    //Q_ASSERT(card_use.to.length() == 2);
+    if (card_use.to.length() != 2){
+        SingleTargetTrick::onUse(room, card_use);
+        return;
+    }
     ServerPlayer *killer = card_use.to.at(0);
     ServerPlayer *victim = card_use.to.at(1);
 

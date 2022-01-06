@@ -278,6 +278,20 @@ void GameRule::onPhaseProceed(ServerPlayer *player) const
                 room->setPlayerFlag(player, "HalfMaxHpEffect");
             }
         }
+        if (player->getHandcardNum() > player->getMaxCards() && player->getMark("@careerist") > 0) {
+            if (room->askForChoice(player, "careerman", "yes+no", QVariant()) == "yes") {
+                LogMessage log;
+                log.type = "#InvokeSkill";
+                log.from = player;
+                log.arg = "careerman";
+                room->sendLog(log);
+                room->broadcastSkillInvoke("careerman", player);
+                room->notifySkillInvoked(player, "careerman");
+                room->removePlayerMark(player, "@careerist");
+                room->handleAcquireDetachSkills(player, "-careerman!");
+                room->setPlayerFlag(player, "CareermanEffect");
+            }
+        }
         int discard_num = player->getHandcardNum() - player->getMaxCards(MaxCardsType::Normal);
         if (discard_num > 0)
             if (!room->askForDiscard(player, "gamerule", discard_num, discard_num))
@@ -285,6 +299,20 @@ void GameRule::onPhaseProceed(ServerPlayer *player) const
         break;
     }
     case Player::Finish: {
+        foreach(ServerPlayer *p, room->getAlivePlayers()){
+            if (p->getMark("mtUsed") > 0){
+                RecoverStruct r;
+                r.who = NULL;
+                r.recover = p->getMark("mtUsed");
+                room->recover(p, r, true);
+                LogMessage log;
+                log.type = "#MapoTofuRecover";
+                log.from = p;
+                log.arg = objectName();
+                room->sendLog(log);
+                p->setMark("mtUsed", 0);
+            }
+        }
         break;
     }
     case Player::NotActive:{
@@ -305,6 +333,33 @@ bool GameRule::effect(TriggerEvent triggerEvent, Room *room, ServerPlayer *playe
         if (triggerEvent == GameStart) {
             if (QFile::exists("image/animate/gamestart.png"))
                 room->doLightbox("$gamestart", 3500);
+
+            if (Config.ActivateSpecialCardMode && room->getMode() != "custom_scenario") {
+
+            }
+
+            if (Config.ViewNextPlayerDeputyGeneral && room->getMode() != "custom_scenario") {
+                foreach (ServerPlayer *p1, room->getPlayers()) {
+                    ServerPlayer *p2 = qobject_cast<ServerPlayer *>(p1->getNextAlive());
+                    QStringList list = room->getTag(p2->objectName()).toStringList();
+                    list.removeAt(0);
+                    foreach (const QString &name, list) {
+                        LogMessage log;
+                        log.type = "$KnownBothViewGeneral";
+                        log.from = p1;
+                        log.to << p2;
+                        log.arg = name;
+                        log.arg2 = "deputy_general";
+                        room->doNotify(p1, QSanProtocol::S_COMMAND_LOG_SKILL, log.toVariant());
+                    }
+                    JsonArray arg;
+                    arg << "view_next_player_deputy_general";
+                    arg << JsonUtils::toJsonArray(list);
+                    room->doNotify(p1, QSanProtocol::S_COMMAND_VIEW_GENERALS, arg);
+                }
+            }
+            room->getThread()->delay(3000);
+
             foreach (ServerPlayer *player, room->getPlayers()) {
                 Q_ASSERT(player->getGeneral() != NULL);
                 /*if (player->getGeneral()->getKingdom() == "god" && player->getGeneralName() != "anjiang") {
@@ -629,6 +684,21 @@ bool GameRule::effect(TriggerEvent triggerEvent, Room *room, ServerPlayer *playe
 
         break;
     }       
+    /*case GeneralRevived: {
+        room->doLightbox(QString::number(player->getVisibleSkillList().length()));
+        foreach (const Skill *skill, player->getVisibleSkillList()) {
+            if (skill->getFrequency() == Skill::Club && !skill->getClubName().isEmpty() && player->hasShownSkill(skill)
+                && (!skill->isLordSkill() || player->hasLordSkill(skill->objectName())))
+                player->addClub(skill->getClubName());
+        }
+    }*/
+    case GeneralTransformed: {
+        foreach (const Skill *skill, player->getVisibleSkillList()) {
+            if (skill->getFrequency() == Skill::Club && !skill->getClubName().isEmpty() && player->hasShownSkill(skill)
+                && (!skill->isLordSkill() || player->hasLordSkill(skill->objectName()))&&!player->hasClub(skill->getClubName()))
+                player->addClub(skill->getClubName());
+        }
+    }
     case DamageCaused: {
         DamageStruct damage = data.value<DamageStruct>();
         if (damage.card && damage.card->isKindOf("IceSlash")
@@ -918,24 +988,37 @@ bool GameRule::effect(TriggerEvent triggerEvent, Room *room, ServerPlayer *playe
             return true;
         }
         if (player->isAlive() && player->hasShownAllGenerals()) {
+            if (player->getMark("CompanionEffect") > 0) {
+                //room->removePlayerMark(player, "CompanionEffect");
+                room->addPlayerMark(player, "@companion");
+                room->attachSkillToPlayer(player, "companion");
+            }
             if (player->getMark("HalfMaxHpLeft") > 0) {
                 room->removePlayerMark(player, "HalfMaxHpLeft");
                 room->addPlayerMark(player, "@halfmaxhp");
                 room->attachSkillToPlayer(player, "halfmaxhp");
             }
         }
+        if (player->isAlive() && data.toBool()) {
+            if (player->getGeneral()->getKingdom() == "careerist"){
+                room->addPlayerMark(player, "@careerist");
+                room->attachSkillToPlayer(player, "careerman");
+            }
+        }
+
         if (Config.RewardTheFirstShowingPlayer && room->getTag("TheFirstToShowRewarded").isNull() && room->getScenario() == NULL) {
             LogMessage log;
             log.type = "#FirstShowReward";
             log.from = player;
             room->sendLog(log);
+            room->setTag("TheFirstToShowRewarded", true);
             if (player->askForSkillInvoke("userdefine:FirstShowReward"))
                 player->drawCards(2);
-            room->setTag("TheFirstToShowRewarded", true);
+            //room->setTag("TheFirstToShowRewarded", true);
         }
         foreach (const Skill *skill, player->getVisibleSkillList()) {
             if (skill->getFrequency() == Skill::Club && !skill->getClubName().isEmpty() && player->hasShownSkill(skill)
-                && (!skill->isLordSkill() || player->hasLordSkill(skill->objectName())))
+                && (!skill->isLordSkill() || player->hasLordSkill(skill->objectName()))&&!player->hasClub(skill->getClubName()))
                 player->addClub(skill->getClubName());
         }
         if (player->isAlive() && player->hasShownAllGenerals()) {
@@ -953,22 +1036,22 @@ bool GameRule::effect(TriggerEvent triggerEvent, Room *room, ServerPlayer *playe
                         room->acquireSkill(player,skill);
                     }
                 }
-                QStringList choices;
+                /*QStringList choices;
                 if (player->isWounded())
                     choices << "recover";
-                choices << "draw" << "cancel";
+                choices << "draw" << "cancel";*/
                 LogMessage log;
                 log.type = "#CompanionEffect";
                 log.from = player;
                 room->sendLog(log);
-                QString choice = room->askForChoice(player, "CompanionEffect", choices.join("+"));
+                /*QString choice = room->askForChoice(player, "CompanionEffect", choices.join("+"));
                 if (choice == "recover") {
                     RecoverStruct recover;
                     recover.who = player;
                     recover.recover = 1;
                     room->recover(player, recover);
                 } else if (choice == "draw")
-                    player->drawCards(2);
+                    player->drawCards(2);*/
                 room->removePlayerMark(player, "CompanionEffect");
 
                 room->setEmotion(player, "companion");
@@ -1058,12 +1141,16 @@ void GameRule::rewardAndPunish(ServerPlayer *killer, ServerPlayer *victim) const
     Room *room = killer->getRoom();
 
     if (!killer->isFriendWith(victim)) {
-        int n = 1;
-        foreach (ServerPlayer *p, room->getOtherPlayers(victim)) {
-            if (victim->isFriendWith(p))
-                ++n;
+        if (killer->getRole() == "careerist")
+            killer->drawCards(3);
+        else {
+            int n = 1;
+            foreach (ServerPlayer *p, room->getOtherPlayers(victim)) {
+                if (victim->isFriendWith(p))
+                    ++n;
+            }
+            killer->drawCards(n);
         }
-        killer->drawCards(n);
     } else
         killer->throwAllHandCardsAndEquips();
 }
@@ -1136,13 +1223,103 @@ QString GameRule::getWinner(ServerPlayer *victim) const
 
         if (has_diff_kingdoms) return QString();    //if has enemy, hehe
 
+
+        //careerist rule
+
+        QList<ServerPlayer *> careerists;
+
+        foreach (ServerPlayer *p, players) {
+            if (p->hasShownGeneral1() || p->getRole() == "careerist") continue;
+            if (p->getActualGeneral1()->getKingdom() == "careerist") {
+                if (room->askForChoice(p, "GameRule:CareeristShow", "yes+no", QVariant()) == "yes") {
+
+                    LogMessage log;
+                    log.type = "#GameRule_CareeristShow";
+                    log.from = p;
+                    room->sendLog(log);
+
+                    room->setTag("GlobalCareeristShow", true);
+                    p->showGeneral();
+                    room->setTag("GlobalCareeristShow", false);
+
+                    careerists << p;
+                }
+            } else
+                room->askForChoice(p, "GameRule:CareeristShow", "no", QVariant());
+        }
+
+        if (room->alivePlayerCount() > 2) {
+            foreach (ServerPlayer *p, careerists) {
+                QList<ServerPlayer *> to_ask;
+
+                foreach (ServerPlayer *p2, players) {
+                    if (p2->isLord()) continue;
+                    if (p2->hasShownGeneral1() && p2->getGeneral()->getKingdom() == "careerist") continue;
+                    if (p2->property("CareeristFriend").toString().isEmpty())
+                        to_ask << p2;
+                }
+
+                if (to_ask.isEmpty()) break;
+
+                if (room->askForChoice(p, "GameRule:CareeristSummon", "yes+no", QVariant()) == "yes") {
+
+                    LogMessage log;
+                    log.type = "#GameRule_CareeristSummon";
+                    log.from = p;
+                    room->sendLog(log);
+
+                     foreach (ServerPlayer *p2, to_ask) {
+                         if (room->askForChoice(p2, "GameRule:CareeristAdd", "yes+no", QVariant()) == "yes") {
+                             room->setPlayerMark(p2, "@"+p->getGeneral()->objectName(), 1);
+                             room->removePlayerMark(p, "@careerist");
+
+                             LogMessage log;
+                             log.type = "#GameRule_CareeristAdd";
+                             log.from = p2;
+                             log.to << p;
+                             room->sendLog(log);
+
+                             room->setPlayerProperty(p, "CareeristFriend", p2->objectName());
+                             room->setPlayerProperty(p2, "CareeristFriend", p->objectName());
+
+                             room->setPlayerProperty(p2, "role", "careerist");
+                             room->getThread()->trigger(DFDebut, room, p2);
+
+                             if (p2->isAlive() && 4 > p2->getHandcardNum())
+                                 p2->drawCards(4 - p2->getHandcardNum());
+
+                             room->recover(p2, RecoverStruct());
+
+                             break;
+                         }
+
+                     }
+                }
+            }
+        }
+
+        if (!careerists.isEmpty()) return QString();
+
+        foreach (ServerPlayer *p, players) {
+            if (p->hasShownGeneral1() || p->getRole() == "careerist") continue;
+            if (p->getActualGeneral1()->getKingdom() == "careerist") {
+                careerists << p;
+            }
+        }
+
+
         // if run here, all are friend.
+
         foreach (ServerPlayer *p, players) {
             if (!p->hasShownGeneral1())
                 p->showGeneral(true, false, false); // dont trigger event
             if (!p->hasShownGeneral2())
                 p->showGeneral(false, false, false);
+            if (win_player->getRole() == "careerist" && !careerists.contains(p))
+                win_player = p;
         }
+
+        if (careerists.length() == room->alivePlayerCount()) return "."; //if all careerists, hehe
 
         foreach (ServerPlayer *p, room->getPlayers()) {
             if (win_player->isFriendWith(p))

@@ -127,7 +127,8 @@ SOURCES += \
     src/ui/startscene.cpp \
     src/package/revolution.cpp \
     src/scenario/maria-battle-scenario.cpp \
-    src/package/maria-battle.cpp
+    src/package/maria-battle.cpp \
+    src/package/specialcards.cpp
 
 HEADERS += \
     src/client/aux-skills.h \
@@ -246,7 +247,8 @@ HEADERS += \
     src/package/newtest.h \
     src/package/revolution.h \
     src/scenario/maria-battle-scenario.h \
-    src/package/maria-battle.h
+    src/package/maria-battle.h \
+    src/package/specialcards.h
 
 FORMS += \
     src/dialog/cardoverview.ui \
