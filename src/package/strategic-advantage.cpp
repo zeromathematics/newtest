@@ -1180,7 +1180,7 @@ bool ThreatenEmperor::isAvailable(const Player *player) const
         else
             invoke = big_kingdoms.contains(player->getKingdom());
     }
-    return invoke && !player->isProhibited(player, this) && TrickCard::isAvailable(player);
+    return (invoke || player->hasClub("sos")) && !player->isProhibited(player, this) && TrickCard::isAvailable(player);
 }
 
 void ThreatenEmperor::onEffect(const CardEffectStruct &effect) const

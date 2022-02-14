@@ -7631,7 +7631,8 @@ public:
     {
         if (!TriggerSkill::triggerable(player)) return QStringList();
         QString pattern = data.toStringList().first();
-        if (player->getPhase() == Player::NotActive && (pattern == "slash" || pattern == "jink"))
+        Card *card = Sanguosha->cloneCard(pattern);
+        if (player->getPhase() == Player::NotActive && (card->isKindOf("BasicCard")))
             return QStringList(objectName());
         return QStringList();
     }
@@ -9725,7 +9726,7 @@ NewtestPackage::NewtestPackage()
    General *reimu = new General(this, "Reimu", "game", 3, false);
    reimu->addSkill(new Mengfeng);
    reimu->addSkill(new Saiqian);
-   reimu->addRelateSkill("reimugive");
+   //reimu->addRelateSkill("reimugive");
    insertRelatedAttachSkill("saiqian", "reimugive");
    //reimu->addSkill(new Tongjie);
    reimu->addCompanion("Marisa");
