@@ -501,9 +501,12 @@ FadingPackage::FadingPackage()
     akari->addCompanion("Aria");
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     General *kuriyama = new General(this, "Kuriyama", "magic", 4, false);
     kuriyama->setDeputyMaxHpAdjustedValue();
 
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
     addMetaObject<MapoTofu>();
