@@ -500,9 +500,12 @@ FadingPackage::FadingPackage()
     akari->addSkill(new Fukurouza);
     akari->addCompanion("Aria");
 
+<<<<<<< Updated upstream
     General *kuriyama = new General(this, "Kuriyama", "magic", 4, false);
     kuriyama->setDeputyMaxHpAdjustedValue();
 
+=======
+>>>>>>> Stashed changes
     addMetaObject<MapoTofu>();
 }
 
